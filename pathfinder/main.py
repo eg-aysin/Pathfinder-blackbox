@@ -113,21 +113,30 @@ async def mass_import(data: ImportRequest):
     merge_keys = ["Facility name / Account name", "Sales Items ID"]
     merged = pd.merge(df1, df2, on=merge_keys, how="outer")
 
-    # Reorder columns to match file3 format
+    # Add 'Cost' column as Quantity * Rate (Unit price)
+    quantity_col = next((col for col in merged.columns if col.lower() == "quantity"), None)
+    rate_col = next((col for col in merged.columns if "rate" in col.lower()), None)
+    if quantity_col and rate_col:
+      merged["Cost"] = merged[quantity_col].astype(float) * merged[rate_col].astype(float)
+    else:
+      merged["Cost"] = None  # or raise an error if preferred
+
+    # Reorder columns to match file3 format and include 'Cost'
     desired_order = [
-        "Facility name / Account name",
-        "Sales Items ID",
-        "Sales item display name",
-        "NetSuite account ID",
-        "NetSuite subscription ID",
-        "NetSuite subscription item ID",
-        "Start date",
-        "Currency",
-        "Quantity",
-        "Rate (Unit price)",
+      "Facility name / Account name",
+      "Sales Items ID",
+      "Sales item display name",
+      "NetSuite account ID",
+      "NetSuite subscription ID",
+      "NetSuite subscription item ID",
+      "Start date",
+      "Currency",
+      "Quantity",
+      "Rate (Unit price)",
+      "Cost",
     ]
     final_cols = [c for c in desired_order if c in merged.columns] + [
-        c for c in merged.columns if c not in desired_order
+      c for c in merged.columns if c not in desired_order
     ]
     merged = merged[final_cols]
 
