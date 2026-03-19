@@ -13,7 +13,7 @@ EnerKey (8000)  →  Pathfinder (8001)  →  Salesforce Mock (8003)
 
 | Service | Port | Role |
 |---|---|---|
-| EnerKey | 8000 | User-facing Bootstrap UI |
+| EnerKey | 8000 | User-facing Bootstrap UI. |
 | Pathfinder | 8001 | Orchestrator – fans out, merges, returns xlsx |
 | Record Box | 8002 | Returns NetSuite mapping data (file2) |
 | Salesforce Mock | 8003 | Returns sales line item data (file1) |
