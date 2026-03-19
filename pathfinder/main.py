@@ -131,18 +131,23 @@ async def mass_import(data: ImportRequest):
     ]
     merged = merged[final_cols]
 
+    # Null value validation
+    if merged.isnull().values.any():
+      null_cols = merged.columns[merged.isnull().any()].tolist()
+      raise HTTPException(400, f"Null values detected in columns: {', '.join(null_cols)}. Please check your data.")
+
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
-        merged.to_excel(writer, index=False, sheet_name="Data")
+      merged.to_excel(writer, index=False, sheet_name="Data")
     output.seek(0)
 
     safe_name = data.facility_name.replace(" ", "_").replace("/", "-")
     return StreamingResponse(
-        output,
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={
-            "Content-Disposition": f'attachment; filename="output_{safe_name}.xlsx"'
-        },
+      output,
+      media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      headers={
+        "Content-Disposition": f'attachment; filename="output_{safe_name}.xlsx"'
+      },
     )
 
 
